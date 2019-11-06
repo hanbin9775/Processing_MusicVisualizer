@@ -10,24 +10,31 @@ def setup():
 
     global start
     start = minim.loadSample("Prime Time.mp3")
-    #ellipseMode(RADIUS)
+    
+    #for convert2circle mode
     global eRadius
     eRadius = 1.1
     global num
     num = 10
-    
+
+
 def draw():
-    
-    global eRadius, num
-    
     background(80)
     noStroke()
+    
+    Convert2Circle()
+    Noise()
+    
+def keyPressed():
+    if key == 'k': start.trigger()
+    
+def Convert2Circle():
+    global num,eRadius
     
     beat.detect(start.mix)
     if(beat.isOnset()):
         #eRadius = 2
         num = 50
-
     
     for y in range(0,height,num):
         for x in range(0,width, num):
@@ -46,7 +53,12 @@ def draw():
      #   eRadius=1
     if(num==50):
         num = 10
-    
-    
-def keyPressed():
-    if key == 'k': start.trigger()
+        
+def Noise():
+    for y in range(0,height,8):
+        for x in range(0,width,8):
+            fill(random(230),50)
+            noStroke()
+            rect(x,y,8,8)
+
+        

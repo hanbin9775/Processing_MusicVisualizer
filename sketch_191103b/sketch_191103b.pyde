@@ -1,6 +1,6 @@
 add_library('minim')
 add_library('video')
-#add_library('opencv')
+add_library('opencv_processing')
 
 
 minim = Minim(this)
@@ -8,8 +8,31 @@ beat = BeatDetect()
 cam = None
 opencv = None
 
+
+class Fish:
+    def __init__(self):
+        self.x = random(width)
+        self.s = 30
+        self.xs = -1 * random(2,10)
+        self.y = random(height)
+        self.emoji = loadImage("fish.png")
+    
+    def display(self):
+        stroke(0)
+        for face in faces:
+            if(dist(face.x+face.width/2,face.y+face.height*3/5, self.x, self.y) <30):
+                self.emoji = loadImage("sushi.png")
+        #textSize(self.s)
+        image(self.emoji, self.x, self.y)
+        
+    def move(self):
+        self.x += self.xs
+        if self.x < -self.s * 1.1:
+            self.x = width + self.s * 1.1
+            self.emoji = loadImage("fish.png")
+
 def setup():
-    size(640, 480)
+    size(320, 240)
     
     global img
     img = loadImage("Prime Time.png")
@@ -24,6 +47,10 @@ def setup():
     nmode = 0
     fmode = 0
     
+    #face tracking
+    global opencv
+    opencv = OpenCV(this, width, height)
+    opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE)
     
     #for convert2circle mode
     global eRadius
@@ -34,17 +61,19 @@ def setup():
     #for snapshot func
     global cam
     #global opencv
-    cam = Capture(this,640, 480)
+    cam = Capture(this,width, height)
     cam.start()
-    #opencv = OpenCV(this, 640 / 2, 480 / 2)
-    #opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE)
-       
-
+    
+    #for fish mode
+    global fishes
+    fishes = list()
+    for i in range(10):
+        fishes.append(Fish())
+    
 
 def draw():
     background(80)
-    noStroke()
-    
+
     if(snapmode == 1):
         SnapShot()
         
@@ -55,7 +84,7 @@ def draw():
         Noise()
     
     if(fmode == 1):
-        Fountain()
+        Fishmove()
         
     
     
@@ -86,7 +115,14 @@ def Convert2Circle():
         num = 10
 
         
-                        
+#Fish mode
+def Fishmove():
+    global fishes
+    for i in range(10):
+        fishes[i].display()
+        fishes[i].move()   
+        
+#Noise Mode                        
 def Noise():
     for y in range(0,height,8):
         for x in range(0,width,8):
@@ -95,16 +131,19 @@ def Noise():
             rect(x,y,8,8)
 
 def SnapShot():
+    opencv.loadImage(cam)
     image(cam,0,0)
+    global faces
+    faces = opencv.detect()
+    #noFill()
+    #stroke(0, 255, 0)
+    #strokeWeight(3)
+    #for face in faces:
+    #    rect(face.x+40, face.y+85, 40, 20)
 
 def captureEvent(c):
     c.read()
 
-#fountain mode
-def Fountain():
-    if(keyPressed('a')):
-           print('hi')
-    
             
 def mousePressed():
     global img
